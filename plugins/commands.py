@@ -51,15 +51,18 @@ async def accept(client, message):
     else:
         return await message.reply("**Message Not Forwarded From Channel Or Group.**")
     await vj.delete()
-    msg = await show.edit("**Accepting all join requests... Please wait until it's completed.**")
+    msg = await show.edit("**Approving all join requests... Please wait until it's completed.**")
     try:
-        while True:
-            await acc.approve_all_chat_join_requests(chat_id)
-            await asyncio.sleep(1)
-            join_requests = [request async for request in acc.get_chat_join_requests(chat_id)]
-            if not join_requests:
-                break
-        await msg.edit("**Successfully accepted all join requests.**")
+        await acc.approve_all_chat_join_requests(chat_id)
+        # Hiding all join requests at once
+        await acc.hide_all_chat_join_requests(chat_id)
+        await msg.edit("**Successfully approved all join requests.**")
+    except FloodWait as e:
+        await asyncio.sleep(e.value)
+        # Retrying after the flood wait
+        await acc.approve_all_chat_join_requests(chat_id)
+        await acc.hide_all_chat_join_requests(chat_id)
+        await msg.edit("**Successfully approved all join requests after a delay.**")
     except Exception as e:
         await msg.edit(f"**An error occurred:** {str(e)}")
         
