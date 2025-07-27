@@ -1,5 +1,14 @@
+import logging
 from pyrogram import Client
 from config import API_ID, API_HASH, BOT_TOKEN
+
+# Enable logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+
+logger = logging.getLogger(__name__)
 
 class Bot(Client):
 
@@ -21,12 +30,12 @@ class Bot(Client):
         me = await self.get_me()
         self.username = '@' + me.username
             
-        print('Bot Started Powered By @VJ_Botz')
+        logger.info('Bot Started Powered By @VJ_Botz')
 
 
     async def stop(self, *args):
 
         await super().stop()
-        print('Bot Stopped Bye')
+        logger.info('Bot Stopped Bye')
 
 Bot().run()

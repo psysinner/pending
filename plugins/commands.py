@@ -65,7 +65,17 @@ async def accept(client, message):
         await acc.hide_all_chat_join_requests(chat_id)
         await msg.edit("**Successfully approved all join requests after a delay.**")
     except Exception as e:
-        await msg.edit(f"**An error occurred:** {str(e)}")
+        logger.error(f"An error occurred: {str(e)}")
+        await msg.edit(f"**An error occurred:** {str(e)}\n\n**Trying to approve requests one by one...**")
+        try:
+            join_requests = [request async for request in acc.get_chat_join_requests(chat_id)]
+            for request in join_requests:
+                await acc.approve_chat_join_request(chat_id, request.from_user.id)
+                await asyncio.sleep(1)
+            await msg.edit("**Successfully approved all join requests.**")
+        except Exception as e:
+            logger.error(f"An error occurred: {str(e)}")
+            await msg.edit(f"**An error occurred:** {str(e)}")
         
 @Client.on_chat_join_request(filters.group | filters.channel)
 async def approve_new(client, m):
